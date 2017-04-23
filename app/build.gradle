@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "player.davy.org.ffmpegplayer"
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilter "armeabi"     //在Application.mk里面设置保持一致，如果是编译了多个平台的，可以指定编译多平台的或者
+            moduleName "FFmpegCodec"    //jni模块的名字，与android.mk文件保持一致
+            ldLibs "log", "z", "m", "jnigraphics", "android"
+            //这里可以设置ldLibs选项，比如你想调试jni的时候必须添加"log"参数
+        }
+    }
+
+    sourceSets.main {
+        jni.srcDirs = [] //disable automatic ndk-build
+        jniLibs.srcDirs = ['src/main/libs/armeabi']
+        jni.srcDirs = ['src/main/jni/', 'src/main/jni/include']
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
+        }
+    }
+    sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] } }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testCompile 'junit:junit:4.12'
+}
